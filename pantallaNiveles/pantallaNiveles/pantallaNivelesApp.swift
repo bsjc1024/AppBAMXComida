@@ -10,8 +10,8 @@ import SwiftUI
 @main
 struct pantallaNivelesApp: App {
     var body: some Scene {
-        DocumentGroup(newDocument: pantallaNivelesDocument()) { file in
-            ContentView(document: file.$document)
+        WindowGroup {
+            GameLevelMap()
         }
     }
 }

@@ -11,7 +11,7 @@ import SwiftUI
 struct pantallaConfiguracionApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ConfigurationScreen()
         }
     }
 }
