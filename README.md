@@ -5,7 +5,7 @@
 Pedro Luis Castañeda Pastelín | A01736619
 Isaac Martínez Trujillo | A01735069
 Jose Antonio Diaz Mendez | A01738341
-en colaboración con el Banco de Alimentos México Cáritas de Puebla.**
+en colaboración con el Banco de Alimentos México Cáritas de Puebla (BAMX).**
 > Un juego educativo móvil para fomentar buenos hábitos alimenticios en niños.
 
 ![Status del Proyecto](https://img.shields.io/badge/Status-En_Desarrollo-green)
