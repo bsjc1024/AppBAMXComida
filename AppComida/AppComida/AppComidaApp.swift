@@ -7,6 +7,102 @@
 
 import SwiftUI
 
+// MARK: - Modelo de Comida
+struct FoodQuestion {
+    let level: Int
+    let emoji: String
+    let correctAnswer: String
+    let wrongAnswers: [String]
+    let question: String
+    
+    // Todas las opciones mezcladas
+    var allAnswers: [String] {
+        (wrongAnswers + [correctAnswer]).shuffled()
+    }
+}
+
+// MARK: - Base de Datos de Comidas
+class FoodDatabase {
+    static let shared = FoodDatabase()
+    
+    let questions: [Int: FoodQuestion] = [
+        1: FoodQuestion(
+            level: 1,
+            emoji: "🍔",
+            correctAnswer: "Hamburguesa",
+            wrongAnswers: ["Pizza", "Taco", "Hot Dog"],
+            question: "¿Qué es esto?"
+        ),
+        2: FoodQuestion(
+            level: 2,
+            emoji: "🍕",
+            correctAnswer: "Pizza",
+            wrongAnswers: ["Empanada", "Hamburguesa", "Pan"],
+            question: "¿Qué es esto?"
+        ),
+        3: FoodQuestion(
+            level: 3,
+            emoji: "🌮",
+            correctAnswer: "Taco",
+            wrongAnswers: ["Burrito", "Enchilada", "Quesadilla"],
+            question: "¿Qué es esto?"
+        ),
+        4: FoodQuestion(
+            level: 4,
+            emoji: "🍜",
+            correctAnswer: "Fideos",
+            wrongAnswers: ["Sopa", "Arroz", "Pasta"],
+            question: "¿Qué es esto?"
+        ),
+        5: FoodQuestion(
+            level: 5,
+            emoji: "🍣",
+            correctAnswer: "Sushi",
+            wrongAnswers: ["Arroz", "Comida Japonesa", "Pescado"],
+            question: "¿Qué es esto?"
+        ),
+        6: FoodQuestion(
+            level: 6,
+            emoji: "🍗",
+            correctAnswer: "Pollo Frito",
+            wrongAnswers: ["Pechuga", "Asado", "Carne"],
+            question: "¿Qué es esto?"
+        ),
+        7: FoodQuestion(
+            level: 7,
+            emoji: "🌭",
+            correctAnswer: "Hot Dog",
+            wrongAnswers: ["Sandwich", "Hamburguesa", "Emparedado"],
+            question: "¿Qué es esto?"
+        ),
+        8: FoodQuestion(
+            level: 8,
+            emoji: "🍝",
+            correctAnswer: "Espagueti",
+            wrongAnswers: ["Fideos", "Pasta", "Macarrones"],
+            question: "¿Qué es esto?"
+        ),
+        9: FoodQuestion(
+            level: 9,
+            emoji: "🥗",
+            correctAnswer: "Ensalada",
+            wrongAnswers: ["Verduras", "Lechugas", "Comida Saludable"],
+            question: "¿Qué es esto?"
+        ),
+        10: FoodQuestion(
+            level: 10,
+            emoji: "🍱",
+            correctAnswer: "Bento",
+            wrongAnswers: ["Comida Japonesa", "Vianda", "Bandeja"],
+            question: "¿Qué es esto?"
+        )
+    ]
+    
+    func getQuestion(for level: Int) -> FoodQuestion? {
+        return questions[level]
+    }
+}
+
 // MARK: - App Principal
 class AppSettings: ObservableObject {
     @Published var soundEnabled = true
@@ -717,6 +813,8 @@ struct GameScreen: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var isCorrectAnswer = false
+    @State private var currentQuestion: FoodQuestion?
+    @State private var answers: [String] = []
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
@@ -779,52 +877,54 @@ struct GameScreen: View {
                         .padding(.top, 20)
                     
                     Spacer(minLength: 20)
-                    
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.yellow.opacity(0.8))
-                            .frame(width: 200, height: 150)
-                        
-                        Text("🍔")
-                            .font(.system(size: 80))
-                    }
-                    .padding(.vertical, 10)
-                    
-                    Text("¿Qué es esto?")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 30)
-                        .padding(.vertical, 15)
-                        .background(Color.green)
-                        .cornerRadius(25)
-                        .padding(.bottom, 10)
-                    
-                    VStack(spacing: 15) {
-                        HStack(spacing: 20) {
-                            Button("Pizza") {
-                                answerSelected("Pizza", isCorrect: false)
-                            }
-                            .buttonStyle(AnswerButtonStyle(color: Color.teal))
-                            
-                            Button("Hamburguesa") {
-                                answerSelected("Hamburguesa", isCorrect: true)
-                            }
-                            .buttonStyle(AnswerButtonStyle(color: Color.teal))
+                                        
+                    if let question = currentQuestion {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.yellow.opacity(0.8))
+                                .frame(width: 200, height: 150)
+                                                
+                            Text(question.emoji)
+                                .font(.system(size: 80))
                         }
-                        
-                        HStack(spacing: 20) {
-                            Button("Ensalada") {
-                                answerSelected("Ensalada", isCorrect: false)
+                        .padding(.vertical, 10)
+                                            
+                        Text(question.question)
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 30)
+                            .padding(.vertical, 15)
+                            .background(Color.green)
+                            .cornerRadius(25)
+                            .padding(.bottom, 10)
+                                            
+                        VStack(spacing: 15) {
+                            HStack(spacing: 20) {
+                                Button(answers[0]) {
+                                    answerSelected(answers[0], isCorrect: answers[0] == question.correctAnswer)
+                                }
+                                .buttonStyle(AnswerButtonStyle(color: Color.teal))
+                                                    
+                                Button(answers[1]) {
+                                    answerSelected(answers[1], isCorrect: answers[1] == question.correctAnswer)
+                                }
+                                .buttonStyle(AnswerButtonStyle(color: Color.teal))
+                                                }
+                                                
+                            HStack(spacing: 20) {
+                                Button(answers[2]) {
+                                    answerSelected(answers[2], isCorrect: answers[2] == question.correctAnswer)
+                                }
+                                .buttonStyle(AnswerButtonStyle(color: Color.green.opacity(0.8)))
+                                                    
+                                Button(answers[3]) {
+                                    answerSelected(answers[3], isCorrect: answers[3] == question.correctAnswer)
+                                }
+                                .buttonStyle(AnswerButtonStyle(color: Color.green.opacity(0.8)))
                             }
-                            .buttonStyle(AnswerButtonStyle(color: Color.green.opacity(0.8)))
-                            
-                            Button("Taco") {
-                                answerSelected("Taco", isCorrect: false)
-                            }
-                            .buttonStyle(AnswerButtonStyle(color: Color.green.opacity(0.8)))
                         }
+                        .padding(.horizontal, 20)
                     }
-                    .padding(.horizontal, 20)
                     
                     Spacer(minLength: 40)
                     
@@ -857,6 +957,9 @@ struct GameScreen: View {
         message: {
             Text(alertMessage)
         }
+        .onAppear {
+            loadQuestion();
+        }
         .navigationBarBackButtonHidden(true)
     }
     
@@ -865,24 +968,31 @@ struct GameScreen: View {
         
         if isCorrect {
             alertTitle = "¡Bien hecho!"
-            alertMessage = "¡Correcto! 🎉\nEs una hamburguesa."
+            alertMessage = "¡Correcto! 🎉\nEs \(currentQuestion?.correctAnswer ?? "correcto")."
         } else {
             alertTitle = "¡Inténtalo de nuevo!"
-            alertMessage = "¡Incorrecto! 😅\nLa respuesta correcta es Hamburguesa."
+            alertMessage = "¡Incorrecto! 😅\nLa respuesta correcta es \(currentQuestion?.correctAnswer ?? "otra")."
         }
         
         showingAlert = true
     }
     
-        private func loadNextQuestion() {
-            alertTitle = "¡Genial!"
-            alertMessage = "¡Nivel completado! 🏆\n¡Siguiente nivel desbloqueado!"
-            showingAlert = true
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                navigationPath.removeLast()
-            }
+    private func loadQuestion() {
+        if let question = FoodDatabase.shared.getQuestion(for: levelNumber) {
+            currentQuestion = question
+            answers = question.allAnswers
         }
+    }
+    
+    private func loadNextQuestion() {
+        alertTitle = "¡Genial!"
+        alertMessage = "¡Nivel completado! 🏆\n¡Siguiente nivel desbloqueado!"
+        showingAlert = true
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            navigationPath.removeLast()
+        }
+    }
 }
 
 // MARK: - Custom Answer Button Style
