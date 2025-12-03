@@ -12,6 +12,30 @@ class AppSettings: ObservableObject {
     @Published var soundEnabled = true
     @Published var darkModeEnabled = false
     @Published var languageSelected = "Español"
+    @Published var unlockedLevels: [Int] = [1]
+    @Published var completedLevels: [Int] = []
+    
+    func unlockLevel(_ level: Int) {
+        if !unlockedLevels.contains(level) {
+            unlockedLevels.append(level)
+            unlockedLevels.sort()
+        }
+    }
+    
+    func completeLevel(_ level: Int) {
+        if !completedLevels.contains(level) {
+            completedLevels.append(level)
+        }
+        unlockLevel(level + 1)
+    }
+    
+    func isLevelUnlocked(_ level: Int) -> Bool {
+        return unlockedLevels.contains(level)
+    }
+    
+    func isLevelCompleted(_ level: Int) -> Bool {
+        return completedLevels.contains(level)
+    }
 }
 
 @main
@@ -491,7 +515,7 @@ struct CustomToggleStyle: ToggleStyle {
 
 // MARK: - Mapa de Niveles
 struct GameLevelMap: View {
-    @State private var unlockedLevel = 5
+    @EnvironmentObject var appSettings: AppSettings
     @Binding var navigationPath: [AppRoute]
     @Environment(\.presentationMode) var presentationMode
     
@@ -535,11 +559,12 @@ struct GameLevelMap: View {
                                 NavigationLink(value: AppRoute.juego(nivel: level)) {
                                     LevelNode(
                                         number: level,
-                                        isUnlocked: level <= unlockedLevel,
-                                        isCurrent: level == unlockedLevel,
+                                        isUnlocked: appSettings.isLevelUnlocked(level),
+                                        isCompleted: appSettings.isLevelCompleted(level),
                                         color: getLevelColor(level)
                                     )
                                 }
+                                .disabled(!appSettings.isLevelUnlocked(level))
                             }
                         }
                         
@@ -548,11 +573,12 @@ struct GameLevelMap: View {
                                 NavigationLink(value: AppRoute.juego(nivel: level)) {
                                     LevelNode(
                                         number: level,
-                                        isUnlocked: level <= unlockedLevel,
-                                        isCurrent: level == unlockedLevel,
+                                        isUnlocked: appSettings.isLevelUnlocked(level),
+                                        isCompleted: appSettings.isLevelCompleted(level),
                                         color: getLevelColor(level)
                                     )
                                 }
+                                .disabled(!appSettings.isLevelUnlocked(level))
                             }
                         }
                         
@@ -561,11 +587,12 @@ struct GameLevelMap: View {
                                 NavigationLink(value: AppRoute.juego(nivel: level)) {
                                     LevelNode(
                                         number: level,
-                                        isUnlocked: level <= unlockedLevel,
-                                        isCurrent: level == unlockedLevel,
+                                        isUnlocked: appSettings.isLevelUnlocked(level),
+                                        isCompleted: appSettings.isLevelCompleted(level),
                                         color: getLevelColor(level)
                                     )
                                 }
+                                .disabled(!appSettings.isLevelUnlocked(level))
                             }
                             Spacer()
                             Spacer()
@@ -591,7 +618,7 @@ struct GameLevelMap: View {
 struct LevelNode: View {
     let number: Int
     let isUnlocked: Bool
-    let isCurrent: Bool
+    let isCompleted: Bool
     let color: Color
     
     @State private var animationScale: CGFloat = 1.0
@@ -604,20 +631,17 @@ struct LevelNode: View {
                 .overlay(Circle().stroke(Color.white, lineWidth: 3))
                 .shadow(radius: isUnlocked ? 5 : 2)
             
-            Text("\(number)").font(.title2).fontWeight(.bold).foregroundColor(.white)
-            
-            if isCurrent {
-                Circle().stroke(Color.yellow, lineWidth: 4).frame(width: 65, height: 65)
-                    .scaleEffect(animationScale)
-                    .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: animationScale)
+            if isCompleted {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(.green)
+            } else {
+                Text("\(number)").font(.title2).fontWeight(.bold).foregroundColor(.white)
             }
             
             if !isUnlocked {
                 Image(systemName: "lock.fill").font(.caption).foregroundColor(.white).offset(y: 15)
             }
-        }
-        .onAppear {
-            if isCurrent { animationScale = 1.2 }
         }
     }
 }
@@ -687,6 +711,7 @@ struct CloudView: View {
 // MARK: - Pantalla de Juego
 struct GameScreen: View {
     let levelNumber: Int
+    @EnvironmentObject var appSettings: AppSettings
     @Binding var navigationPath: [AppRoute]
     @State private var showingAlert = false
     @State private var alertTitle = ""
@@ -820,6 +845,7 @@ struct GameScreen: View {
         .alert(alertTitle, isPresented: $showingAlert) {
             if isCorrectAnswer {
                 Button("Siguiente") {
+                    appSettings.completeLevel(levelNumber)
                     loadNextQuestion()
                 }
             } else {
@@ -827,7 +853,8 @@ struct GameScreen: View {
                     showingAlert = false
                 }
             }
-        } message: {
+        }
+        message: {
             Text(alertMessage)
         }
         .navigationBarBackButtonHidden(true)
@@ -847,11 +874,15 @@ struct GameScreen: View {
         showingAlert = true
     }
     
-    private func loadNextQuestion() {
-        alertTitle = "¡Genial!"
-        alertMessage = "¡Siguiente pregunta cargada!"
-        showingAlert = true
-    }
+        private func loadNextQuestion() {
+            alertTitle = "¡Genial!"
+            alertMessage = "¡Nivel completado! 🏆\n¡Siguiente nivel desbloqueado!"
+            showingAlert = true
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                navigationPath.removeLast()
+            }
+        }
 }
 
 // MARK: - Custom Answer Button Style
