@@ -200,7 +200,7 @@ struct PantallaInicio: View {
                     .font(.system(size: 50))
                     .padding(.horizontal, 40)
                 
-                    Text("Quiz\n de\n Comida")
+                    Text("Adivina\n la\n Comida")
                         .font(.custom("Times New Roman", size: 75))
                         .fontWeight(.black)
                         .foregroundColor(.white)
@@ -225,10 +225,16 @@ struct PantallaInicio: View {
                 HStack{
                     Text("🍕")
                     Spacer()
-                    Text("🍓")
                 }
                 .font(.system(size: 50))
                 .padding(.horizontal, 40)
+            }
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    LogoView()
+                }
             }
         }
     }
@@ -355,6 +361,13 @@ struct PantallaCarga: View {
                 }
                     
                 Spacer()
+            }
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    LogoView()
+                }
             }
         }
         .onAppear {
@@ -515,11 +528,12 @@ struct ConfigurationScreen: View {
                 }
                 .padding(.bottom, 40)
                 
+            }
+            VStack {
+                Spacer()
                 HStack {
                     Spacer()
-                    AppleIcon()
-                        .padding(.trailing, 40)
-                        .padding(.bottom, 20)
+                    LogoView()
                 }
             }
         }
@@ -696,6 +710,13 @@ struct GameLevelMap: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(.horizontal, 40)
+                }
+            }
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    LogoView()
                 }
             }
         }
@@ -941,6 +962,13 @@ struct GameScreen: View {
                     .padding(.bottom, 30)
                 }
             }
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    LogoView()
+                }
+            }
         }
         .alert(alertTitle, isPresented: $showingAlert) {
             if isCorrectAnswer {
@@ -1008,6 +1036,18 @@ struct AnswerButtonStyle: ButtonStyle {
             .cornerRadius(25)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Vista de Logo
+struct LogoView: View {
+    var body: some View {
+        Image("logo")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 80, height: 80)
+            .padding(.trailing, 20)
+            .padding(.bottom, 20)
     }
 }
 
