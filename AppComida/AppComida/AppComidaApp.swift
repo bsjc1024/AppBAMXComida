@@ -8,11 +8,21 @@
 import SwiftUI
 
 // MARK: - App Principal
+class AppSettings: ObservableObject {
+    @Published var soundEnabled = true
+    @Published var darkModeEnabled = false
+    @Published var languageSelected = "Español"
+}
+
 @main
 struct QuizComidaApp: App {
+    @StateObject private var appSettings = AppSettings()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(appSettings)
+                .preferredColorScheme(appSettings.darkModeEnabled ? .dark : .light)
         }
     }
 }
@@ -268,14 +278,13 @@ struct CustomProgressViewStyle: ProgressViewStyle {
 
 // MARK: - Pantalla Configuración
 struct ConfigurationScreen: View {
-    @State private var soundEnabled = true
-    @State private var darkModeEnabled = true
-    @State private var languageSelected = "Español"
+    @EnvironmentObject var appSettings: AppSettings
     @Binding var navigationPath: [AppRoute]
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
-            Color.orange
+            (appSettings.darkModeEnabled ? Color(red: 0.15, green: 0.15, blue: 0.15) : Color.orange)
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -306,7 +315,7 @@ struct ConfigurationScreen: View {
                         
                         Spacer()
                         
-                        Toggle("", isOn: $soundEnabled)
+                        Toggle("", isOn: $appSettings.soundEnabled)
                             .toggleStyle(CustomToggleStyle())
                     }
                     .padding(.horizontal, 40)
@@ -319,7 +328,7 @@ struct ConfigurationScreen: View {
                         
                         Spacer()
                         
-                        Toggle("", isOn: $darkModeEnabled)
+                        Toggle("", isOn: $appSettings.darkModeEnabled)
                             .toggleStyle(CustomToggleStyle())
                     }
                     .padding(.horizontal, 40)
@@ -347,7 +356,7 @@ struct ConfigurationScreen: View {
                                         .foregroundColor(.red)
                                 }
                                 
-                                Text("Español")
+                                Text(appSettings.languageSelected)
                                     .font(.title3)
                                     .fontWeight(.medium)
                                     .foregroundColor(.white)
@@ -864,4 +873,5 @@ struct AnswerButtonStyle: ButtonStyle {
 // MARK: - Preview
 #Preview {
     ContentView()
+        .environmentObject(AppSettings())
 }
